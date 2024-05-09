@@ -10,7 +10,12 @@ import matplotlib.pyplot as plt
 from tensorflow import keras
 from ns3gym import ns3env
 
-env = gym.make('ns3-v0')
+#env = gym.make('ns3-v0')
+env = ns3env.Ns3Env() 
+#env.step()
+#env = ns3env.Ns3Env()
+#obs = env.reset()
+#agent = MyAgent.Agent()
 ob_space = env.observation_space
 ac_space = env.action_space
 print("Observation space: ", ob_space,  ob_space.dtype)
@@ -39,7 +44,9 @@ rew_history = []
 for e in range(total_episodes):
 
     state = env.reset()
+    #print(state)
     state = np.reshape(state, [1, s_size])
+    #print(state)
     rewardsum = 0
     for time in range(max_env_steps):
 

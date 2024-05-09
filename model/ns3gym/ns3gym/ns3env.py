@@ -413,6 +413,7 @@ class Ns3Env(gym.Env):
         return (obs, reward, done, extraInfo)
 
     def step(self, action):
+        #print("\n ====================== ns3env")
         response = self.ns3ZmqBridge.step(action)
         self.envDirty = True
         return self.get_state()

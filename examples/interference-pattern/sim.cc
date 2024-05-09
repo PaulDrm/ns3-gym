@@ -60,8 +60,19 @@ int main (int argc, char *argv[])
   interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (2, {0,0,1,0}));
   interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (3, {0,0,0,1}));
 
+  // interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (0, {0,0,0,1}));
+  // interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (1, {0,0,1,0}));
+  // interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (2, {0,1,0,0}));
+  // interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (3, {1,0,0,0}));
+
   // set channel number correctly, do not modify
+  // Extract the channel usage vector for the first time slot to determine the number of channels.
+  // This operation assumes that all time slots have the same number of channels, which is a
+  // necessary assumption for the simulation to work correctly.
   std::vector<uint32_t> tmp = interferencePattern.at(0);
+
+  // Set the number of channels based on the size of the vector in the first time slot.
+  // This value is used to iterate over channels when setting up the interference pattern.
   uint32_t channNum = tmp.size();
 
   CommandLine cmd;

@@ -27,6 +27,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <random> // Include this for std::random_device and std::uniform_int_distribution
+
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("MyGymEnv");
@@ -107,9 +109,10 @@ MyGymEnv::GetGameOver()
   for (auto& v : m_collisions)
     collisionNum += v;
 
-  if (collisionNum >= m_collisionTh){
-    isGameOver = true;
-  }
+  // if (collisionNum >= m_collisionTh){
+  //   isGameOver = true;
+  // }
+  
   NS_LOG_UNCOND ("MyGetGameOver: " << isGameOver);
   return isGameOver;
 }
@@ -155,10 +158,30 @@ std::string
 MyGymEnv::GetExtraInfo()
 {
   NS_LOG_FUNCTION (this);
-  std::string myInfo = "info";
+  //std::string myInfo = "info";
+  std::ostringstream oss;
+  oss << "{"
+      << "'info': 'extra_info'"
+      << "}";
+  std::string myInfo = oss.str();
   NS_LOG_UNCOND("MyGetExtraInfo: " << myInfo);
   return myInfo;
 }
+
+// Ptr<OpenGymDataContainer>
+// MyGymEnv::GetExtraInfo()
+// {
+//   NS_LOG_FUNCTION (this);
+//   Ptr<OpenGymDictContainer> dict = CreateObject<OpenGymDictContainer>();
+  
+//   // Add key-value pairs to the dictionary
+//   dict->Add("info", CreateObject<OpenGymStringContainer>("extra_info"));
+//   dict->Add("collision_num", CreateObject<OpenGymUintContainer>(m_collisions.size()));
+//   // Add more key-value pairs as needed
+  
+//   NS_LOG_UNCOND("MyGetExtraInfo: " << dict);
+//   return dict;
+// }
 
 bool
 MyGymEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
@@ -172,11 +195,25 @@ MyGymEnv::ExecuteActions(Ptr<OpenGymDataContainer> action)
   return true;
 }
 
+uint32_t MyGymEnv::ConvertDbWToUint(double dbw) {
+    double offsetDbW = dbw + 100; // Shift range from [-100, 0] to [0, 100]
+    return static_cast<uint32_t>(offsetDbW);
+}
+
 void
 MyGymEnv::CollectChannelOccupation(uint32_t chanId, uint32_t occupied)
 {
   NS_LOG_FUNCTION (this);
   m_channelOccupation.push_back(occupied);
+}
+
+void MyGymEnv::CollectChannelPower(uint32_t channelId, double powerDbW) 
+{
+    uint32_t powerUint = ConvertDbWToUint(powerDbW);
+    //NS_LOG_UNCOND("Channel: " << channelId << " Converted Power: " << powerUint);
+    // Assuming you have a method to collect or store these values
+    // storePowerValue(channelId, powerUint);
+    m_channelOccupation.push_back(powerUint);
 }
 
 bool
@@ -193,21 +230,51 @@ MyGymEnv::ClearObs()
   m_channelOccupation.clear();
 }
 
+// void
+// MyGymEnv::PerformCca (Ptr<MyGymEnv> entity, uint32_t channelId, Ptr<const SpectrumValue> avgPowerSpectralDensity)
+// {
+//   double power = Integral (*(avgPowerSpectralDensity));
+//   double powerDbW = 10 * std::log10(power);
+//   double threshold = -60;
+//   uint32_t busy = powerDbW > threshold;
+//   NS_LOG_UNCOND("Channel: " << channelId << " CCA: " << busy << " RxPower: " << powerDbW);
+
+//   entity->CollectChannelOccupation(channelId, busy);
+
+//   if (entity->CheckIfReady()){
+//     entity->Notify();
+//     entity->ClearObs();
+//   }
+// }
+
 void
-MyGymEnv::PerformCca (Ptr<MyGymEnv> entity, uint32_t channelId, Ptr<const SpectrumValue> avgPowerSpectralDensity)
+MyGymEnv::PerformCca(Ptr<MyGymEnv> entity, uint32_t channelId, Ptr<const SpectrumValue> avgPowerSpectralDensity)
 {
-  double power = Integral (*(avgPowerSpectralDensity));
-  double powerDbW = 10 * std::log10(power);
-  double threshold = -60;
-  uint32_t busy = powerDbW > threshold;
-  NS_LOG_UNCOND("Channel: " << channelId << " CCA: " << busy << " RxPower: " << powerDbW);
+    double power = Integral(*(avgPowerSpectralDensity)); // Calculate total power
+    double powerDbW = 10 * std::log10(power); // Convert power to dBW
 
-  entity->CollectChannelOccupation(channelId, busy);
+    // Log the power and channel information
+    NS_LOG_UNCOND("Channel: " << channelId << " RxPower: " << powerDbW);
 
-  if (entity->CheckIfReady()){
-    entity->Notify();
-    entity->ClearObs();
-  }
+    // Setup random number generation
+    static std::random_device rd;  // Seed with a real random value, if available
+    static std::mt19937 rng(rd()); // Use Mersenne Twister to generate pseudo-random numbers
+    std::uniform_int_distribution<int> uni(-10, 10); // Define uniform distribution from -10 to 10
+
+    // Modify powerDbW by a random value from -10 to 10
+    powerDbW += uni(rng);
+
+    // Log the modified power and channel information
+    NS_LOG_UNCOND("Channel: " << channelId << " Modified RxPower: " << powerDbW);
+
+    // Collect or handle the actual power level instead of the binary busy/idle status
+    entity->CollectChannelPower(channelId, powerDbW);
+
+    if (entity->CheckIfReady()){
+        entity->Notify();
+        entity->ClearObs();
+    }
 }
+
 
 } // ns3 namespace

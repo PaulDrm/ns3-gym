@@ -47,12 +47,16 @@ public:
   Ptr<OpenGymDataContainer> GetObservation();
   float GetReward();
   std::string GetExtraInfo();
+  // Ptr<OpenGymDataContainer> GetExtraInfo();
   bool ExecuteActions(Ptr<OpenGymDataContainer> action);
 
   // the function has to be static to work with MakeBoundCallback
   // that is why we pass pointer to MyGymEnv instance to be able to store the context (node, etc)
   static void PerformCca(Ptr<MyGymEnv> entity, uint32_t channelId, Ptr<const SpectrumValue> avgPowerSpectralDensity);
+  uint32_t ConvertDbWToUint(double dbw);
   void CollectChannelOccupation(uint32_t chanId, uint32_t occupied);
+  void CollectChannelPower(uint32_t channelId, double powerDbW);
+  
   bool CheckIfReady();
   void ClearObs();
 
@@ -60,6 +64,8 @@ private:
   void ScheduleNextStateRead();
   Ptr<WifiMacQueue> GetQueue(Ptr<Node> node);
   bool SetCw(Ptr<Node> node, uint32_t cwMinValue=0, uint32_t cwMaxValue=0);
+
+  
 
   Time m_interval = Seconds(0.1);
   Ptr<Node> m_currentNode;
