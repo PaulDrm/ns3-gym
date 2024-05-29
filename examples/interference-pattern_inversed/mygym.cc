@@ -230,50 +230,51 @@ MyGymEnv::ClearObs()
   m_channelOccupation.clear();
 }
 // TODO THIS HAS BEEN CHANGED FOR NOISE EVALUATION
+void
+MyGymEnv::PerformCca (Ptr<MyGymEnv> entity, uint32_t channelId, Ptr<const SpectrumValue> avgPowerSpectralDensity)
+{
+  double power = Integral (*(avgPowerSpectralDensity));
+  double powerDbW = 10 * std::log10(power);
+  double threshold = -60;
+  uint32_t busy = powerDbW > threshold;
+  NS_LOG_UNCOND("Channel: " << channelId << " CCA: " << busy << " RxPower: " << powerDbW);
+
+  entity->CollectChannelOccupation(channelId, busy);
+
+  if (entity->CheckIfReady()){
+    entity->Notify();
+    entity->ClearObs();
+  }
+}
+
 // void
-// MyGymEnv::PerformCca (Ptr<MyGymEnv> entity, uint32_t channelId, Ptr<const SpectrumValue> avgPowerSpectralDensity)
+// MyGymEnv::PerformCca(Ptr<MyGymEnv> entity, uint32_t channelId, Ptr<const SpectrumValue> avgPowerSpectralDensity)
 // {
-//   double power = Integral (*(avgPowerSpectralDensity));
-//   double powerDbW = 10 * std::log10(power);
-//   double threshold = -60;
-//   uint32_t busy = powerDbW > threshold;
-//   NS_LOG_UNCOND("Channel: " << channelId << " CCA: " << busy << " RxPower: " << powerDbW);
+//     double power = Integral(*(avgPowerSpectralDensity)); // Calculate total power
+//     double powerDbW = 10 * std::log10(power); // Convert power to dBW
 
-//   entity->CollectChannelOccupation(channelId, busy);
+//     // Log the power and channel information
+//     NS_LOG_UNCOND("Channel: " << channelId << " RxPower: " << powerDbW);
 
-//   if (entity->CheckIfReady()){
-//     entity->Notify();
-//     entity->ClearObs();
-//   }
+//     // Setup random number generation
+//     static std::random_device rd;  // Seed with a real random value, if available
+//     static std::mt19937 rng(rd()); // Use Mersenne Twister to generate pseudo-random numbers
+//     std::uniform_int_distribution<int> uni(-2, 2); // Define uniform distribution from -10 to 10
+
+//     // Modify powerDbW by a random value from -10 to 10
+//     powerDbW += uni(rng);
+
+//     // Log the modified power and channel information
+//     NS_LOG_UNCOND("Channel: " << channelId << " Modified RxPower: " << powerDbW);
+
+//     // Collect or handle the actual power level instead of the binary busy/idle status
+//     entity->CollectChannelPower(channelId, powerDbW);
+
+//     if (entity->CheckIfReady()){
+//         entity->Notify();
+//         entity->ClearObs();
+//     }
 // }
 
-void
-MyGymEnv::PerformCca(Ptr<MyGymEnv> entity, uint32_t channelId, Ptr<const SpectrumValue> avgPowerSpectralDensity)
-{
-    double power = Integral(*(avgPowerSpectralDensity)); // Calculate total power
-    double powerDbW = 10 * std::log10(power); // Convert power to dBW
-
-    // Log the power and channel information
-    NS_LOG_UNCOND("Channel: " << channelId << " RxPower: " << powerDbW);
-
-    // Setup random number generation
-    static std::random_device rd;  // Seed with a real random value, if available
-    static std::mt19937 rng(rd()); // Use Mersenne Twister to generate pseudo-random numbers
-    std::uniform_int_distribution<int> uni(-2, 2); // Define uniform distribution from -10 to 10
-
-    // Modify powerDbW by a random value from -10 to 10
-    powerDbW += uni(rng);
-
-    // Log the modified power and channel information
-    NS_LOG_UNCOND("Channel: " << channelId << " Modified RxPower: " << powerDbW);
-
-    // Collect or handle the actual power level instead of the binary busy/idle status
-    entity->CollectChannelPower(channelId, powerDbW);
-
-    if (entity->CheckIfReady()){
-        entity->Notify();
-        entity->ClearObs();
-    }
-}
 
 } // ns3 namespace

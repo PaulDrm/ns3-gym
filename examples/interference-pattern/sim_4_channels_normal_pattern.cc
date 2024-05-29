@@ -59,6 +59,12 @@ int main (int argc, char *argv[])
   interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (1, {0,1,0,0}));
   interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (2, {0,0,1,0}));
   interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (3, {0,0,0,1}));
+  //interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (4, {0,0,0,0,1,0}));
+  //interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (5, {0,0,0,0,0,1}));
+  // interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (0, {0,0,0,1}));
+  // interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (1, {0,0,1,0}));
+  // interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (2, {0,1,0,0}));
+  // interferencePattern.insert(std::pair<uint32_t, std::vector<uint32_t> > (3, {1,0,0,0}));
 
   // set channel number correctly, do not modify
   // Extract the channel usage vector for the first time slot to determine the number of channels.
